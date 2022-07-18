@@ -106,20 +106,13 @@ func Update(hero *entity.Hero) (err error) {
 		return
 	}
 
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	_, err = tx.ExecContext(ctx, "update attribute set attack = ?, defend = ?, armor = ?, hero_id = ? where hero_id = ?", hero.Attribute.Attack, hero.Attribute.Defend, hero.Attribute.Armor, hero.Id, hero.Id)
-
 	if err != nil {
 		tx.Rollback()
 		return
 	}
 
-	if err == nil {
-		tx.Commit()
-	}
+	tx.Commit()
 
 	return
 }

@@ -40,7 +40,16 @@ func FindById(c *gin.Context) {
 }
 
 func Store(c *gin.Context) {
-	hero, err := service.Store(c)
+	var hero entity.Hero
+	err := c.ShouldBindJSON(&hero)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = service.Store(&hero)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -51,6 +60,17 @@ func Store(c *gin.Context) {
 }
 
 func Update(c *gin.Context) {
+	var hero entity.Hero
+
+	err := c.ShouldBindJSON(&hero)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	paramId := c.Param("id")
 
 	id, err := strconv.Atoi(paramId)
@@ -70,7 +90,9 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	hero, err := service.Update(c)
+	hero.Id = id
+
+	err = service.Update(&hero, id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -87,7 +109,7 @@ func Delete(c *gin.Context) {
 
 	id, err := strconv.Atoi(paramId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 	}

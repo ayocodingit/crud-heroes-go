@@ -1,20 +1,12 @@
 package service
 
 import (
-	"strconv"
-
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/entity"
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/repository"
-	"github.com/gin-gonic/gin"
 )
 
-func Store(c *gin.Context) (hero entity.Hero, err error) {
-	err = c.ShouldBindJSON(&hero)
-	if err != nil {
-		return
-	}
-
-	err = repository.Store(&hero)
+func Store(hero *entity.Hero) (err error) {
+	err = repository.Store(hero)
 	if err != nil {
 		return
 	}
@@ -22,22 +14,8 @@ func Store(c *gin.Context) (hero entity.Hero, err error) {
 	return
 }
 
-func Update(c *gin.Context) (hero entity.Hero, err error) {
-	id := c.Param("id")
-	err = c.ShouldBindJSON(&hero)
-
-	if err != nil {
-		return
-	}
-
-	heroId, err := strconv.Atoi(id)
-	if err != nil {
-		return
-	}
-
-	hero.Id = heroId
-
-	err = repository.Update(&hero)
+func Update(hero *entity.Hero, id int) (err error) {
+	err = repository.Update(hero)
 	if err != nil {
 		return
 	}
