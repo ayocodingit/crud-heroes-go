@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ayocodingit/crud-heroes-go/src/helpers"
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/entity"
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/service"
 	"github.com/gin-gonic/gin"
@@ -49,6 +50,14 @@ func Store(c *gin.Context) {
 		return
 	}
 
+	err = helpers.Validate(hero)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	err = service.Store(&hero)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -66,6 +75,14 @@ func Update(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	err = helpers.Validate(hero)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error": err.Error(),
 		})
 		return
