@@ -92,7 +92,7 @@ func Update(c *gin.Context) {
 
 	hero.Id = id
 
-	err = service.Update(&hero, id)
+	err = service.Update(&hero)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),

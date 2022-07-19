@@ -14,7 +14,7 @@ func Store(hero *entity.Hero) (err error) {
 	return
 }
 
-func Update(hero *entity.Hero, id int) (err error) {
+func Update(hero *entity.Hero) (err error) {
 	err = repository.Update(hero)
 	if err != nil {
 		return
