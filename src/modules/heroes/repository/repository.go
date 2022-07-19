@@ -2,19 +2,28 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
-	"github.com/ayocodingit/crud-heroes-go/src/config"
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/entity"
 )
 
-func FindAll() []entity.Hero {
+type repository struct {
+	db *sql.DB
+}
+
+func New(db *sql.DB) *repository {
+	return &repository{db}
+}
+
+var querySelect = "select heroes.id as id, name, ability, role, defend, attack, armor  from heroes LEFT JOIN attribute ON heroes.id = attribute.hero_id"
+
+func (r repository) FindAll(req entity.QueryFindAll) []entity.Hero {
+	log.Println(req)
 	var heroes []entity.Hero
-	db := config.LoadDB()
+	db := r.db
 
-	results, err := db.Query("select heroes.id as id, name, ability, role, defend, attack, armor  from heroes LEFT JOIN attribute ON heroes.id = attribute.hero_id")
-
-	defer db.Close()
+	results, err := db.Query(querySelect)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -32,27 +41,23 @@ func FindAll() []entity.Hero {
 	return heroes
 }
 
-func FindById(id int) (hero entity.Hero, err error) {
-	db := config.LoadDB()
+func (r repository) FindById(id int) (hero entity.Hero, err error) {
+	db := r.db
 
-	err = db.QueryRow("select heroes.id as id, name, ability, role, defend, attack, armor  from heroes LEFT JOIN attribute ON heroes.id = attribute.hero_id where heroes.id = ?", id).Scan(&hero.Id, &hero.Name, &hero.Ability, &hero.Role, &hero.Attribute.Defend, &hero.Attribute.Attack, &hero.Attribute.Armor)
-
-	defer db.Close()
+	err = db.QueryRow(querySelect+" where heroes.id = ?", id).Scan(&hero.Id, &hero.Name, &hero.Ability, &hero.Role, &hero.Attribute.Defend, &hero.Attribute.Attack, &hero.Attribute.Armor)
 
 	return
 }
 
-func Delete(id int) {
-	db := config.LoadDB()
+func (r repository) Delete(id int) {
+	db := r.db
 
 	db.QueryRow("delete from heroes where id = ?", id)
 
-	defer db.Close()
 }
 
-func Store(hero *entity.Hero) (err error) {
-	db := config.LoadDB()
-	defer db.Close()
+func (r repository) Store(hero *entity.Hero) (err error) {
+	db := r.db
 
 	ctx := context.Background()
 
@@ -88,9 +93,8 @@ func Store(hero *entity.Hero) (err error) {
 	return
 }
 
-func Update(hero *entity.Hero) (err error) {
-	db := config.LoadDB()
-	defer db.Close()
+func (r repository) Update(hero entity.Hero) (err error) {
+	db := r.db
 
 	ctx := context.Background()
 

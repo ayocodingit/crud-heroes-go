@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/http"
+	"github.com/ayocodingit/crud-heroes-go/src/config"
+	hero "github.com/ayocodingit/crud-heroes-go/src/modules/heroes/http"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -17,8 +18,9 @@ func main() {
 	}
 
 	router := gin.Default()
+	db := config.LoadDB()
 
-	http.Handler(router)
+	hero.Handler(router, db)
 
 	router.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }

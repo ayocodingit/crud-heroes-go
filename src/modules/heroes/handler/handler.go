@@ -6,17 +6,28 @@ import (
 
 	"github.com/ayocodingit/crud-heroes-go/src/helpers"
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/entity"
-	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/service"
 	"github.com/gin-gonic/gin"
 )
 
-func FindAll(c *gin.Context) {
-	result := entity.ResponseFindAll{Message: "success", Data: service.FindAll()}
-
-	c.JSON(http.StatusOK, result)
+type handler struct {
+	service entity.Service
 }
 
-func FindById(c *gin.Context) {
+func New(service entity.Service) *handler {
+	return &handler{service}
+}
+
+func (h handler) FindAll(c *gin.Context) {
+	var req entity.QueryFindAll
+
+	result := h.service.FindAll(req)
+
+	res := entity.ResponseFindAll{Message: "success", Data: result}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (h handler) FindById(c *gin.Context) {
 	paramId := c.Param("id")
 
 	id, err := strconv.Atoi(paramId)
@@ -26,7 +37,7 @@ func FindById(c *gin.Context) {
 		})
 	}
 
-	data, err := service.FindById(id)
+	data, err := h.service.FindById(id)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -40,7 +51,7 @@ func FindById(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func Store(c *gin.Context) {
+func (h handler) Store(c *gin.Context) {
 	var hero entity.Hero
 	err := c.ShouldBindJSON(&hero)
 	if err != nil {
@@ -58,7 +69,7 @@ func Store(c *gin.Context) {
 		return
 	}
 
-	err = service.Store(&hero)
+	err = h.service.Store(&hero)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -68,7 +79,7 @@ func Store(c *gin.Context) {
 	c.JSON(http.StatusOK, hero)
 }
 
-func Update(c *gin.Context) {
+func (h handler) Update(c *gin.Context) {
 	var hero entity.Hero
 
 	err := c.ShouldBindJSON(&hero)
@@ -98,7 +109,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	_, err = service.FindById(id)
+	_, err = h.service.FindById(id)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -109,7 +120,7 @@ func Update(c *gin.Context) {
 
 	hero.Id = id
 
-	err = service.Update(&hero)
+	err = h.service.Update(hero)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": err.Error(),
@@ -121,7 +132,7 @@ func Update(c *gin.Context) {
 
 }
 
-func Delete(c *gin.Context) {
+func (h handler) Delete(c *gin.Context) {
 	paramId := c.Param("id")
 
 	id, err := strconv.Atoi(paramId)
@@ -131,7 +142,7 @@ func Delete(c *gin.Context) {
 		})
 	}
 
-	_, err = service.FindById(id)
+	_, err = h.service.FindById(id)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -140,7 +151,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	service.Delete(id)
+	h.service.Delete(id)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Deleted!",

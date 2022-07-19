@@ -2,11 +2,18 @@ package service
 
 import (
 	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/entity"
-	"github.com/ayocodingit/crud-heroes-go/src/modules/heroes/repository"
 )
 
-func Store(hero *entity.Hero) (err error) {
-	err = repository.Store(hero)
+type service struct {
+	repository entity.Repository
+}
+
+func New(repository entity.Repository) *service {
+	return &service{repository}
+}
+
+func (s *service) Store(hero *entity.Hero) (err error) {
+	err = s.repository.Store(hero)
 	if err != nil {
 		return
 	}
@@ -14,8 +21,8 @@ func Store(hero *entity.Hero) (err error) {
 	return
 }
 
-func Update(hero *entity.Hero) (err error) {
-	err = repository.Update(hero)
+func (s *service) Update(hero entity.Hero) (err error) {
+	err = s.repository.Update(hero)
 	if err != nil {
 		return
 	}
@@ -23,16 +30,16 @@ func Update(hero *entity.Hero) (err error) {
 	return
 }
 
-func FindAll() []entity.Hero {
-	return repository.FindAll()
+func (s *service) FindAll(req entity.QueryFindAll) []entity.Hero {
+	return s.repository.FindAll(req)
 }
 
-func FindById(id int) (data entity.Hero, err error) {
-	data, err = repository.FindById(id)
+func (s *service) FindById(id int) (hero entity.Hero, err error) {
+	hero, err = s.repository.FindById(id)
 
 	return
 }
 
-func Delete(id int) {
-	repository.Delete(id)
+func (s *service) Delete(id int) {
+	s.repository.Delete(id)
 }
